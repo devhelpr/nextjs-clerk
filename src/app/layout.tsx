@@ -44,7 +44,7 @@ export default function RootLayout({
               <SignedIn>
                 <div className="flex gap-4 items-center">
                   <UserButton />
-                  <p>Hello there! you're logged in using clerk</p>
+                  <p>Hello there! you&apos;re logged in using clerk</p>
                   <SignOutButton>
                     <button className="bg-blue-500 rounded hover:bg-blue-600 px-4 py-2 text-white">
                       Custom sign out button
