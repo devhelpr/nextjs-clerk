@@ -6,9 +6,9 @@ export async function GET() {
     // This is a sample query - adjust the table name and columns according to your database
     const data = await sql`SELECT * FROM users LIMIT 100`;
     return NextResponse.json({ data });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: "Failed to fetch data" },
+      { error: "Failed to fetch data", details: (error as string).toString() },
       { status: 500 }
     );
   }
