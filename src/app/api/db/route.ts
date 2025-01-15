@@ -4,13 +4,33 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
-    await auth.protect();
+    const session = await auth();
+
+    if (!session?.userId) {
+      return NextResponse.json(
+        { error: "Unauthorized: Please sign in to access this resource" },
+        { status: 401 }
+      );
+    }
+
     // This is a sample query - adjust the table name and columns according to your database
     const data = await sql`SELECT * FROM users LIMIT 100`;
     return NextResponse.json({ data });
-  } catch (error: unknown) {
+  } catch (error) {
+    // If it's an authentication error, return 401
+    if (
+      error instanceof Error &&
+      error.message.toLowerCase().includes("unauthorized")
+    ) {
+      return NextResponse.json(
+        { error: "Unauthorized: Please sign in to access this resource" },
+        { status: 401 }
+      );
+    }
+
+    // For other errors, return 500
     return NextResponse.json(
-      { error: "Failed to fetch data", details: (error as string).toString() },
+      { error: "Failed to fetch data", details: (error as Error).message },
       { status: 500 }
     );
   }
