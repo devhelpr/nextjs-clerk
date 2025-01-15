@@ -14,20 +14,9 @@ export async function GET() {
     }
 
     // This is a sample query - adjust the table name and columns according to your database
-    const data = await sql`SELECT * FROM users LIMIT 100`;
+    const data = await sql`SELECT id,name FROM users LIMIT 100`;
     return NextResponse.json({ data });
   } catch (error) {
-    // If it's an authentication error, return 401
-    if (
-      error instanceof Error &&
-      error.message.toLowerCase().includes("unauthorized")
-    ) {
-      return NextResponse.json(
-        { error: "Unauthorized: Please sign in to access this resource" },
-        { status: 401 }
-      );
-    }
-
     // For other errors, return 500
     return NextResponse.json(
       { error: "Failed to fetch data", details: (error as Error).message },
