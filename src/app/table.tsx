@@ -21,24 +21,67 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Add shimmer animation styles
+const shimmer = `
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+`;
+
 const LoadingRow = () => (
-  <tr className="animate-pulse">
+  <tr>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
-      <div className="h-4 bg-gray-200 rounded w-8"></div>
+      <div
+        className="h-4 rounded relative overflow-hidden bg-gray-100"
+        style={{ width: "2rem" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+      </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
-      <div className="h-4 bg-gray-200 rounded w-32"></div>
+      <div
+        className="h-4 rounded relative overflow-hidden bg-gray-100"
+        style={{ width: "8rem" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+      </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
       <div className="flex gap-2">
-        <div className="h-4 bg-gray-200 rounded w-12"></div>
-        <div className="h-4 bg-gray-200 rounded w-12"></div>
+        <div
+          className="h-4 rounded relative overflow-hidden bg-gray-100"
+          style={{ width: "3rem" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+        </div>
+        <div
+          className="h-4 rounded relative overflow-hidden bg-gray-100"
+          style={{ width: "3rem" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+        </div>
       </div>
     </td>
   </tr>
 );
 
 export default function Home() {
+  // Add shimmer keyframes to document
+  useEffect(() => {
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = shimmer;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
+
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
