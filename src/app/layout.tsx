@@ -9,6 +9,7 @@ import {
   SignOutButton,
   UserButton,
 } from "@clerk/nextjs";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,12 @@ export default function RootLayout({
               </SignedOut>
               <SignedIn>
                 <div className="flex gap-4 items-center justify-end">
+                  <Link
+                    href="/profile"
+                    className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Edit Profile
+                  </Link>
                   <UserButton />
                   <p className="text-gray-700 dark:text-gray-300">
                     Hello there! you&apos;re logged in using clerk
