@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -13,13 +13,18 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "desc";
 
     // Get sessions where user is either the owner or participant
-    const sessionsResult = await sql`
+    const query = `
       SELECT * FROM chat_sessions 
-      WHERE user_id = ${userId} OR owner_id = ${userId}
-      ORDER BY updated_at ${sort === "asc" ? sql`ASC` : sql`DESC`}
+      WHERE user_id = $1 OR owner_id = $1
+      ORDER BY updated_at ${sort.toUpperCase()}
     `;
 
-    return NextResponse.json({ data: sessionsResult.rows });
+    const sessionsResult = await sql.query(query, [session.userId]);
+
+    // Return empty array if no sessions found
+    return NextResponse.json({
+      data: sessionsResult.rows || [],
+    });
   } catch (error) {
     console.error("Error fetching sessions:", error);
     return NextResponse.json(
@@ -31,8 +36,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,11 +50,13 @@ export async function POST(request: NextRequest) {
     // Create new chat session
     const sessionResult = await sql`
       INSERT INTO chat_sessions (user_id, owner_id, title)
-      VALUES (${userId}, ${userId}, ${title})
+      VALUES (${session.userId}, ${session.userId}, ${title})
       RETURNING *
     `;
 
-    return NextResponse.json({ data: sessionResult.rows[0] });
+    return NextResponse.json({
+      data: sessionResult.rows[0] || null,
+    });
   } catch (error) {
     console.error("Error creating session:", error);
     return NextResponse.json(

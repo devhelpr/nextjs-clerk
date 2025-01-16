@@ -24,8 +24,13 @@ export default function ChatSessionsPage() {
       setLoading(true);
       const response = await fetch("/api/chat/sessions?sort=desc");
       const result = await response.json();
-      if (result.error) throw new Error(result.error);
-      setSessions(result.data);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      // Handle empty sessions as a valid state
+      setSessions(result.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch sessions");
     } finally {
