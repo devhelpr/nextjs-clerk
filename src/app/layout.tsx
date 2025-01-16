@@ -32,22 +32,28 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className="light">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-black dark:text-white`}
         >
           <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-            <header>
+            <header className="w-full">
               <SignedOut>
-                <SignInButton />
+                <SignInButton>
+                  <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Sign in
+                  </button>
+                </SignInButton>
               </SignedOut>
               <SignedIn>
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-4 items-center justify-end">
                   <UserButton />
-                  <p>Hello there! you&apos;re logged in using clerk</p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    Hello there! you&apos;re logged in using clerk
+                  </p>
                   <SignOutButton>
-                    <button className="bg-blue-500 rounded hover:bg-blue-600 px-4 py-2 text-white">
-                      Custom sign out button
+                    <button className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 px-4 py-2 text-white rounded">
+                      Sign out
                     </button>
                   </SignOutButton>
                 </div>

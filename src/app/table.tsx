@@ -17,8 +17,8 @@ interface User {
 }
 
 const LoadingSpinner = () => (
-  <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+  <div className="absolute inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-10">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
   </div>
 );
 
@@ -169,7 +169,9 @@ export default function Home() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="p-4 w-full">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold">Database Records</h1>
+            <h1 className="text-2xl font-bold dark:text-white">
+              Database Records
+            </h1>
             <div className="flex items-center gap-4">
               <form onSubmit={handleAdd} className="flex gap-2">
                 <input
@@ -177,20 +179,20 @@ export default function Home() {
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Enter new name"
-                  className="border rounded px-2 py-1"
+                  className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                   required
                   disabled={loading}
                 />
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-green-600 dark:hover:bg-green-700"
                   disabled={loading}
                 >
                   Add New
                 </button>
               </form>
               <select
-                className="border rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="border rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                 value={pagination.limit}
                 onChange={(e) => handleLimitChange(Number(e.target.value))}
                 disabled={loading}
@@ -205,16 +207,16 @@ export default function Home() {
 
           <div className="overflow-x-auto mb-4 relative">
             {loading && !initialLoading && <LoadingSpinner />}
-            <table className="min-w-full bg-white border border-gray-300">
+            <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 border-b border-gray-300 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     ID
                   </th>
-                  <th className="px-6 py-3 border-b border-gray-300 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-6 py-3 border-b border-gray-300 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -228,24 +230,27 @@ export default function Home() {
                   <tr>
                     <td
                       colSpan={3}
-                      className="px-6 py-4 text-center text-gray-500 border-b border-gray-300"
+                      className="px-6 py-4 text-center text-gray-500 dark:text-gray-400 border-b border-gray-300 dark:border-gray-700"
                     >
                       No data found
                     </td>
                   </tr>
                 ) : (
                   data.map((row) => (
-                    <tr key={row.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
+                    <tr
+                      key={row.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
                         {row.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
                         {editingId === row.id ? (
                           <input
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="border rounded px-2 py-1 w-full"
+                            className="border rounded px-2 py-1 w-full dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             autoFocus
                             disabled={loading}
                           />
@@ -253,19 +258,19 @@ export default function Home() {
                           row.name
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300 dark:border-gray-700">
                         {editingId === row.id ? (
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleSaveEdit(row.id)}
-                              className="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               Save
                             </button>
                             <button
                               onClick={handleCancelEdit}
-                              className="text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               Cancel
@@ -275,14 +280,14 @@ export default function Home() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEdit(row)}
-                              className="text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDelete(row.id)}
-                              className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               Delete
@@ -298,7 +303,7 @@ export default function Home() {
           </div>
 
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
               {!initialLoading && (
                 <>
                   Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
@@ -314,31 +319,31 @@ export default function Home() {
               <button
                 onClick={() => handlePageChange(1)}
                 disabled={pagination.page === 1 || loading}
-                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 First
               </button>
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page === 1 || loading}
-                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 Previous
               </button>
-              <span className="px-3 py-1">
+              <span className="px-3 py-1 dark:text-white">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={!pagination.hasMore || loading}
-                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 Next
               </button>
               <button
                 onClick={() => handlePageChange(pagination.totalPages)}
                 disabled={pagination.page === pagination.totalPages || loading}
-                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 Last
               </button>
