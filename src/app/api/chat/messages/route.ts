@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sql } from "@vercel/postgres";
+import sql from "../../../../lib/db";
 import { auth } from "@clerk/nextjs/server";
 
 interface MessageFile {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       AND (user_id = ${session.userId} OR owner_id = ${session.userId})
     `;
 
-    if (sessionResult.rows.length === 0) {
+    if (sessionResult.length === 0) {
       return NextResponse.json(
         { error: "Chat session not found" },
         { status: 404 }
@@ -42,13 +42,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get messages with files
-    const query = `
+    const messagesResult = await sql`
       SELECT 
         m.id,
         m.message,
         m.created_at,
         CASE 
-          WHEN m.sender_id = $1 THEN 'user'
+          WHEN m.sender_id = ${session.userId} THEN 'user'
           ELSE 'owner'
         END as sender,
         COALESCE(
@@ -64,16 +64,16 @@ export async function GET(request: NextRequest) {
         ) as files
       FROM chat_messages m
       LEFT JOIN message_files f ON m.id = f.message_id
-      WHERE m.session_id = $2
+      WHERE m.session_id = ${sessionId}
       GROUP BY m.id, m.message, m.created_at, m.sender_id
       ORDER BY m.created_at ${sort.toUpperCase()}
     `;
 
-    const messagesResult = await sql.query(query, [session.userId, sessionId]);
+    //const messagesResult = await sql.query(query, [session.userId, sessionId]);
 
     // Return empty array if no messages found
     return NextResponse.json({
-      data: messagesResult.rows || [],
+      data: messagesResult || [],
     });
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       AND (user_id = ${session.userId} OR owner_id = ${session.userId})
     `;
 
-    if (sessionResult.rows.length === 0) {
+    if (sessionResult.length === 0) {
       return NextResponse.json(
         { error: "Chat session not found" },
         { status: 404 }
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       RETURNING id, message, created_at
     `;
 
-    const newMessage = messageResult.rows[0];
+    const newMessage = messageResult[0];
 
     // Insert files if any
     const messageFiles: MessageFile[] = [];
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
           VALUES (${newMessage.id}, ${file.file_url}, ${file.file_name})
           RETURNING id, file_url, file_name, uploaded_at
         `;
-        messageFiles.push(fileResult.rows[0] as MessageFile);
+        messageFiles.push(fileResult[0] as MessageFile);
       }
     }
 

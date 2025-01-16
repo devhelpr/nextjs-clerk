@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sql } from "@vercel/postgres";
+import sql from "../../../../lib/db";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET(request: NextRequest) {
@@ -13,17 +13,16 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "desc";
 
     // Get sessions where user is either the owner or participant
-    const query = `
+
+    const sessionsResult = await sql`
       SELECT * FROM chat_sessions 
-      WHERE user_id = $1
+      WHERE user_id = ${session.userId}
       ORDER BY created_at ${sort.toUpperCase()}
     `;
 
-    const sessionsResult = await sql.query(query, [session.userId]);
-
     // Return empty array if no sessions found
     return NextResponse.json({
-      data: sessionsResult.rows || [],
+      data: sessionsResult || [],
     });
   } catch (error) {
     console.error("Error fetching sessions:", error);
@@ -55,7 +54,7 @@ export async function POST(request: NextRequest) {
     `;
 
     return NextResponse.json({
-      data: sessionResult.rows[0] || null,
+      data: sessionResult[0] || null,
     });
   } catch (error) {
     console.error("Error creating session:", error);
