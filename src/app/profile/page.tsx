@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [profileExists, setProfileExists] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -33,6 +34,7 @@ export default function ProfilePage() {
 
       if (result.error) throw new Error(result.error);
       setProfile(result.data);
+      setProfileExists(result.exists);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch profile");
     } finally {
@@ -58,7 +60,12 @@ export default function ProfilePage() {
       if (result.error) throw new Error(result.error);
 
       setProfile(result.data);
-      setSuccessMessage("Profile updated successfully!");
+      setProfileExists(result.exists);
+      setSuccessMessage(
+        profileExists
+          ? "Profile updated successfully!"
+          : "Profile created successfully!"
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile");
     } finally {
@@ -76,7 +83,9 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 dark:text-white">Edit Profile</h1>
+      <h1 className="text-2xl font-bold mb-6 dark:text-white">
+        {profileExists ? "Edit Profile" : "Create Profile"}
+      </h1>
 
       {error && (
         <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded">
@@ -108,6 +117,7 @@ export default function ProfilePage() {
             className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             required
             disabled={saving}
+            placeholder="Enter your full name"
           />
         </div>
 
@@ -127,6 +137,7 @@ export default function ProfilePage() {
             }
             className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             disabled={saving}
+            placeholder="Enter your location (optional)"
           />
         </div>
 
@@ -146,6 +157,7 @@ export default function ProfilePage() {
             }
             className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             disabled={saving}
+            placeholder="Enter your phone number (optional)"
           />
         </div>
 
@@ -155,14 +167,20 @@ export default function ProfilePage() {
             disabled={saving}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving..." : "Save Profile"}
+            {saving
+              ? "Saving..."
+              : profileExists
+              ? "Update Profile"
+              : "Create Profile"}
           </button>
         </div>
       </form>
 
-      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-        Profile created: {new Date(profile.created_at).toLocaleDateString()}
-      </div>
+      {profileExists && (
+        <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          Profile created: {new Date(profile.created_at).toLocaleDateString()}
+        </div>
+      )}
     </div>
   );
 }

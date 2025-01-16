@@ -24,22 +24,19 @@ export async function GET() {
     const [profile] = await sql<UserProfile[]>`
       SELECT full_name, location, phone_number, created_at
       FROM user_profiles
-      WHERE user_id = ${session.userId}::uuid
+      WHERE user_id = ${session.userId}
     `;
 
-    // If no profile exists, return default empty data
-    if (!profile) {
-      return NextResponse.json({
-        data: {
-          full_name: "",
-          location: null,
-          phone_number: null,
-          created_at: new Date().toISOString(),
-        },
-      });
-    }
-
-    return NextResponse.json({ data: profile });
+    // Return default empty data if no profile exists
+    return NextResponse.json({
+      data: profile || {
+        full_name: "",
+        location: null,
+        phone_number: null,
+        created_at: new Date().toISOString(),
+      },
+      exists: !!profile,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch profile", details: (error as Error).message },
@@ -73,7 +70,7 @@ export async function PUT(request: Request) {
     // Upsert the profile
     const [updatedProfile] = await sql<UserProfile[]>`
       INSERT INTO user_profiles (user_id, full_name, location, phone_number)
-      VALUES (${session.userId}::uuid, ${full_name}, ${location}, ${phone_number})
+      VALUES (${session.userId}, ${full_name}, ${location}, ${phone_number})
       ON CONFLICT (user_id)
       DO UPDATE SET
         full_name = EXCLUDED.full_name,
@@ -82,7 +79,10 @@ export async function PUT(request: Request) {
       RETURNING full_name, location, phone_number, created_at
     `;
 
-    return NextResponse.json({ data: updatedProfile });
+    return NextResponse.json({
+      data: updatedProfile,
+      exists: true,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to update profile", details: (error as Error).message },
