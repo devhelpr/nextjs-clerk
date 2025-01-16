@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const sessionId = searchParams.get("session_id");
-    const sort = searchParams.get("sort") || "desc";
+    //const sort = searchParams.get("sort") || "desc";
 
     if (!sessionId) {
       return NextResponse.json(
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN message_files f ON m.id = f.message_id
       WHERE m.session_id = ${sessionId}
       GROUP BY m.id, m.message, m.created_at, m.sender_id
-      ORDER BY m.created_at ${sort.toUpperCase()}
+      ORDER BY m.created_at desc
     `;
 
     //const messagesResult = await sql.query(query, [session.userId, sessionId]);

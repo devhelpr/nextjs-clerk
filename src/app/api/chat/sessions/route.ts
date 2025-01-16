@@ -14,10 +14,17 @@ export async function GET(request: NextRequest) {
 
     // Get sessions where user is either the owner or participant
 
-    const sessionsResult = await sql`
+    const sessionsResult =
+      (await sort) === "desc"
+        ? sql`
       SELECT * FROM chat_sessions 
       WHERE user_id = ${session.userId}
-      ORDER BY created_at ${sort.toUpperCase()}
+      ORDER BY created_at desc
+    `
+        : sql`
+      SELECT * FROM chat_sessions 
+      WHERE user_id = ${session.userId}
+      ORDER BY created_at asc
     `;
 
     // Return empty array if no sessions found
