@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
     // Get sessions where user is either the owner or participant
     const query = `
       SELECT * FROM chat_sessions 
-      WHERE user_id = $1 OR owner_id = $1
-      ORDER BY updated_at ${sort.toUpperCase()}
+      WHERE user_id = $1
+      ORDER BY created_at ${sort.toUpperCase()}
     `;
 
     const sessionsResult = await sql.query(query, [session.userId]);
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
 
     // Create new chat session
     const sessionResult = await sql`
-      INSERT INTO chat_sessions (user_id, owner_id, title)
-      VALUES (${session.userId}, ${session.userId}, ${title})
+      INSERT INTO chat_sessions (user_id,  session_name)
+      VALUES (${session.userId}, ${title})
       RETURNING *
     `;
 
