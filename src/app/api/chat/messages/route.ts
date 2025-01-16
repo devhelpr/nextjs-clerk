@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const sessionResult = await sql`
       SELECT * FROM chat_sessions 
       WHERE id = ${sessionId} 
-      AND (user_id = ${session.userId} OR owner_id = ${session.userId})
+      AND (user_id = ${session.userId})
     `;
 
     if (sessionResult.length === 0) {
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         m.message,
         m.created_at,
         CASE 
-          WHEN m.sender_id = ${session.userId} THEN 'user'
+          WHEN m.sender = ${session.userId} THEN 'user'
           ELSE 'owner'
         END as sender,
         COALESCE(
@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
           '[]'
         ) as files
       FROM chat_messages m
-      LEFT JOIN message_files f ON m.id = f.message_id
+      LEFT JOIN file_uploads f ON m.id = f.message_id
       WHERE m.session_id = ${sessionId}
-      GROUP BY m.id, m.message, m.created_at, m.sender_id
+      GROUP BY m.id, m.message, m.created_at, m.sender
       ORDER BY m.created_at desc
     `;
 
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     const sessionResult = await sql`
       SELECT * FROM chat_sessions 
       WHERE id = ${session_id} 
-      AND (user_id = ${session.userId} OR owner_id = ${session.userId})
+      AND (user_id = ${session.userId})
     `;
 
     if (sessionResult.length === 0) {
@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
 
     // Insert message
     const messageResult = await sql`
-      INSERT INTO chat_messages (session_id, sender_id, message)
-      VALUES (${session_id}, ${session.userId}, ${message})
+      INSERT INTO chat_messages (session_id, sender, message)
+      VALUES (${session_id}::uuid, ${session.userId}, ${message})
       RETURNING id, message, created_at
     `;
 

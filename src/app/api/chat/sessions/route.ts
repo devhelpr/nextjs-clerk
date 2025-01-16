@@ -13,18 +13,10 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "desc";
 
     // Get sessions where user is either the owner or participant
-
-    const sessionsResult =
-      (await sort) === "desc"
-        ? sql`
+    const sessionsResult = await sql`
       SELECT * FROM chat_sessions 
       WHERE user_id = ${session.userId}
-      ORDER BY created_at desc
-    `
-        : sql`
-      SELECT * FROM chat_sessions 
-      WHERE user_id = ${session.userId}
-      ORDER BY created_at asc
+      ORDER BY created_at ${sort === "asc" ? sql`ASC` : sql`DESC`}
     `;
 
     // Return empty array if no sessions found
@@ -55,8 +47,8 @@ export async function POST(request: NextRequest) {
 
     // Create new chat session
     const sessionResult = await sql`
-      INSERT INTO chat_sessions (user_id,  session_name)
-      VALUES (${session.userId}, ${title})
+      INSERT INTO chat_sessions (user_id, owner_id, title)
+      VALUES (${session.userId}, ${session.userId}, ${title})
       RETURNING *
     `;
 
