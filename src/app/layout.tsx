@@ -58,6 +58,12 @@ function NavMenu() {
           Dashboard
         </Link>
         <Link
+          href="/chat"
+          className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+        >
+          Chat
+        </Link>
+        <Link
           href="/profile"
           className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
         >
@@ -83,6 +89,12 @@ function NavMenu() {
           className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           Dashboard
+        </Link>
+        <Link
+          href="/chat"
+          className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          Chat
         </Link>
         <Link
           href="/profile"
