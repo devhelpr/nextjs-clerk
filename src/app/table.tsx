@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import styles from "./table.module.css";
 
 interface PaginationData {
   total: number;
@@ -21,49 +22,25 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// Add shimmer animation styles
-const shimmer = `
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-`;
-
 const LoadingRow = () => (
   <tr>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
-      <div
-        className="h-4 rounded relative overflow-hidden bg-gray-100"
-        style={{ width: "2rem" }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+      <div className={styles.shimmerContainer} style={{ width: "2rem" }}>
+        <div className={styles.shimmerEffect} />
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
-      <div
-        className="h-4 rounded relative overflow-hidden bg-gray-100"
-        style={{ width: "8rem" }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+      <div className={styles.shimmerContainer} style={{ width: "8rem" }}>
+        <div className={styles.shimmerEffect} />
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
       <div className="flex gap-2">
-        <div
-          className="h-4 rounded relative overflow-hidden bg-gray-100"
-          style={{ width: "3rem" }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+        <div className={styles.shimmerContainer} style={{ width: "3rem" }}>
+          <div className={styles.shimmerEffect} />
         </div>
-        <div
-          className="h-4 rounded relative overflow-hidden bg-gray-100"
-          style={{ width: "3rem" }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-[shimmer_1.5s_infinite]" />
+        <div className={styles.shimmerContainer} style={{ width: "3rem" }}>
+          <div className={styles.shimmerEffect} />
         </div>
       </div>
     </td>
@@ -71,17 +48,6 @@ const LoadingRow = () => (
 );
 
 export default function Home() {
-  // Add shimmer keyframes to document
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.textContent = shimmer;
-    document.head.appendChild(styleSheet);
-
-    return () => {
-      document.head.removeChild(styleSheet);
-    };
-  }, []);
-
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
