@@ -15,9 +15,33 @@ interface User {
   name: string;
 }
 
+const LoadingSpinner = () => (
+  <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+  </div>
+);
+
+const LoadingRow = () => (
+  <tr className="animate-pulse">
+    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+      <div className="h-4 bg-gray-200 rounded w-8"></div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+      <div className="h-4 bg-gray-200 rounded w-32"></div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+      <div className="flex gap-2">
+        <div className="h-4 bg-gray-200 rounded w-12"></div>
+        <div className="h-4 bg-gray-200 rounded w-12"></div>
+      </div>
+    </td>
+  </tr>
+);
+
 export default function Home() {
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
@@ -42,6 +66,7 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Failed to fetch data");
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -128,9 +153,7 @@ export default function Home() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
-  if (!data.length) return <div className="p-4">No data found</div>;
 
   return (
     <>
@@ -147,18 +170,21 @@ export default function Home() {
                   placeholder="Enter new name"
                   className="border rounded px-2 py-1"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
                 >
                   Add New
                 </button>
               </form>
               <select
-                className="border rounded px-2 py-1"
+                className="border rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={pagination.limit}
                 onChange={(e) => handleLimitChange(Number(e.target.value))}
+                disabled={loading}
               >
                 <option value="5">5 per page</option>
                 <option value="10">10 per page</option>
@@ -168,7 +194,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-x-auto mb-4">
+          <div className="overflow-x-auto mb-4 relative">
+            {loading && !initialLoading && <LoadingSpinner />}
             <table className="min-w-full bg-white border border-gray-300">
               <thead>
                 <tr>
@@ -184,80 +211,107 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {data.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
-                      {row.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
-                      {editingId === row.id ? (
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="border rounded px-2 py-1 w-full"
-                          autoFocus
-                        />
-                      ) : (
-                        row.name
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
-                      {editingId === row.id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSaveEdit(row.id)}
-                            className="text-green-600 hover:text-green-800"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="text-gray-600 hover:text-gray-800"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(row)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(row.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                {initialLoading ? (
+                  Array.from({ length: pagination.limit }).map((_, index) => (
+                    <LoadingRow key={index} />
+                  ))
+                ) : data.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={3}
+                      className="px-6 py-4 text-center text-gray-500 border-b border-gray-300"
+                    >
+                      No data found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  data.map((row) => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
+                        {row.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-300">
+                        {editingId === row.id ? (
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="border rounded px-2 py-1 w-full"
+                            autoFocus
+                            disabled={loading}
+                          />
+                        ) : (
+                          row.name
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+                        {editingId === row.id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveEdit(row.id)}
+                              className="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(row)}
+                              className="text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(row.id)}
+                              className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={loading}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-700">
-              Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
-              of {pagination.total} results
+              {!initialLoading && (
+                <>
+                  Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.total
+                  )}{" "}
+                  of {pagination.total} results
+                </>
+              )}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => handlePageChange(1)}
-                disabled={pagination.page === 1}
+                disabled={pagination.page === 1 || loading}
                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 First
               </button>
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 1}
+                disabled={pagination.page === 1 || loading}
                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
@@ -267,14 +321,14 @@ export default function Home() {
               </span>
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={!pagination.hasMore}
+                disabled={!pagination.hasMore || loading}
                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
               <button
                 onClick={() => handlePageChange(pagination.totalPages)}
-                disabled={pagination.page === pagination.totalPages}
+                disabled={pagination.page === pagination.totalPages || loading}
                 className="px-3 py-1 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Last
