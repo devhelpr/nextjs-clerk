@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     if (files && files.length > 0) {
       for (const file of files) {
         const fileResult = await sql`
-          INSERT INTO message_files (message_id, file_url, file_name)
+          INSERT INTO file_uploads (message_id, file_url, file_name)
           VALUES (${newMessage.id}, ${file.file_url}, ${file.file_name})
           RETURNING id, file_url, file_name, uploaded_at
         `;
