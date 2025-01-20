@@ -29,3 +29,8 @@ prisma migrate dev --name ...
 ```
 ... is the name of the migration
 
+run the following command to generate the prisma client
+
+```bash
+prisma generate
+```
