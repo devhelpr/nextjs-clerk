@@ -19,3 +19,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+
+## Prisma
+
+after making changes to schema.prisma, run the following commands to update the database schema
+
+```bash
+prisma migrate dev --name ...
+```
+... is the name of the migration
+
