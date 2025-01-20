@@ -11,9 +11,12 @@ interface PaginationData {
   hasMore: boolean;
 }
 
-interface User {
+interface Product {
   id: number;
   name: string;
+  price: number | null;
+  description: string | null;
+  createdAt: string;
 }
 
 const LoadingSpinner = () => (
@@ -35,6 +38,16 @@ const LoadingRow = () => (
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+      <div className={styles.shimmerContainer} style={{ width: "5rem" }}>
+        <div className={styles.shimmerEffect} />
+      </div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
+      <div className={styles.shimmerContainer} style={{ width: "12rem" }}>
+        <div className={styles.shimmerEffect} />
+      </div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300">
       <div className="flex gap-2">
         <div className={styles.shimmerContainer} style={{ width: "3rem" }}>
           <div className={styles.shimmerEffect} />
@@ -47,14 +60,14 @@ const LoadingRow = () => (
   </tr>
 );
 
-export default function Home() {
-  const [data, setData] = useState<User[]>([]);
+export default function ProductTable() {
+  const [data, setData] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editName, setEditName] = useState("");
-  const [newName, setNewName] = useState("");
+  const [editForm, setEditForm] = useState<Partial<Product>>({});
+  const [newProduct, setNewProduct] = useState<Partial<Product>>({});
   const [pagination, setPagination] = useState<PaginationData>({
     total: 0,
     page: 1,
@@ -66,7 +79,7 @@ export default function Home() {
   const fetchData = async (page: number, limit: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/db?page=${page}&limit=${limit}`);
+      const response = await fetch(`/api/product?page=${page}&limit=${limit}`);
       const result = await response.json();
       if (result.error) throw new Error(result.error);
       setData(result.data);
@@ -91,22 +104,22 @@ export default function Home() {
     setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
   };
 
-  const handleEdit = (user: User) => {
-    setEditingId(user.id);
-    setEditName(user.name);
+  const handleEdit = (product: Product) => {
+    setEditingId(product.id);
+    setEditForm(product);
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setEditName("");
+    setEditForm({});
   };
 
   const handleSaveEdit = async (id: number) => {
     try {
-      const response = await fetch("/api/db", {
+      const response = await fetch("/api/product", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, name: editName }),
+        body: JSON.stringify({ id, ...editForm }),
       });
 
       if (!response.ok) {
@@ -116,17 +129,17 @@ export default function Home() {
 
       await fetchData(pagination.page, pagination.limit);
       setEditingId(null);
-      setEditName("");
+      setEditForm({});
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update record");
+      setError(err instanceof Error ? err.message : "Failed to update product");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this record?")) return;
+    if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const response = await fetch(`/api/db?id=${id}`, {
+      const response = await fetch(`/api/product?id=${id}`, {
         method: "DELETE",
       });
 
@@ -137,17 +150,17 @@ export default function Home() {
 
       await fetchData(pagination.page, pagination.limit);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete record");
+      setError(err instanceof Error ? err.message : "Failed to delete product");
     }
   };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/db", {
+      const response = await fetch("/api/product", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName }),
+        body: JSON.stringify(newProduct),
       });
 
       if (!response.ok) {
@@ -156,9 +169,9 @@ export default function Home() {
       }
 
       await fetchData(pagination.page, pagination.limit);
-      setNewName("");
+      setNewProduct({});
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add record");
+      setError(err instanceof Error ? err.message : "Failed to add product");
     }
   };
 
@@ -169,26 +182,52 @@ export default function Home() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="p-4 w-full">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold dark:text-white">
-              Database Records
-            </h1>
+            <h1 className="text-2xl font-bold dark:text-white">Products</h1>
             <div className="flex items-center gap-4">
               <form onSubmit={handleAdd} className="flex gap-2">
                 <input
                   type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Enter new name"
+                  value={newProduct.name || ""}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                  placeholder="Product name"
                   className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                   required
+                  disabled={loading}
+                />
+                <input
+                  type="number"
+                  value={newProduct.price || ""}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      price: parseFloat(e.target.value),
+                    })
+                  }
+                  placeholder="Price"
+                  className="border rounded px-2 py-1 w-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
+                  disabled={loading}
+                />
+                <input
+                  type="text"
+                  value={newProduct.description || ""}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Description"
+                  className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
                   disabled={loading}
                 />
                 <button
                   type="submit"
                   className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-green-600 dark:hover:bg-green-700"
-                  disabled={loading}
+                  disabled={loading || !newProduct.name}
                 >
-                  Add New
+                  Add Product
                 </button>
               </form>
               <select
@@ -217,6 +256,12 @@ export default function Home() {
                     Name
                   </th>
                   <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -229,42 +274,80 @@ export default function Home() {
                 ) : data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={3}
+                      colSpan={5}
                       className="px-6 py-4 text-center text-gray-500 dark:text-gray-400 border-b border-gray-300 dark:border-gray-700"
                     >
-                      No data found
+                      No products found
                     </td>
                   </tr>
                 ) : (
-                  data.map((row) => (
+                  data.map((product) => (
                     <tr
-                      key={row.id}
+                      key={product.id}
                       className="hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
-                        {row.id}
+                        {product.id}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
-                        {editingId === row.id ? (
+                        {editingId === product.id ? (
                           <input
                             type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
+                            value={editForm.name || ""}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, name: e.target.value })
+                            }
                             className="border rounded px-2 py-1 w-full dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             autoFocus
                             disabled={loading}
                           />
                         ) : (
-                          row.name
+                          product.name
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
+                        {editingId === product.id ? (
+                          <input
+                            type="number"
+                            value={editForm.price || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                price: parseFloat(e.target.value),
+                              })
+                            }
+                            className="border rounded px-2 py-1 w-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                            disabled={loading}
+                          />
+                        ) : (
+                          product.price?.toFixed(2)
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 border-b border-gray-300 dark:border-gray-700">
+                        {editingId === product.id ? (
+                          <input
+                            type="text"
+                            value={editForm.description || ""}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                description: e.target.value,
+                              })
+                            }
+                            className="border rounded px-2 py-1 w-full dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                            disabled={loading}
+                          />
+                        ) : (
+                          product.description
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm border-b border-gray-300 dark:border-gray-700">
-                        {editingId === row.id ? (
+                        {editingId === product.id ? (
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleSaveEdit(row.id)}
+                              onClick={() => handleSaveEdit(product.id)}
                               className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                              disabled={loading}
+                              disabled={loading || !editForm.name}
                             >
                               Save
                             </button>
@@ -279,14 +362,14 @@ export default function Home() {
                         ) : (
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleEdit(row)}
+                              onClick={() => handleEdit(product)}
                               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >
                               Edit
                             </button>
                             <button
-                              onClick={() => handleDelete(row.id)}
+                              onClick={() => handleDelete(product.id)}
                               className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={loading}
                             >

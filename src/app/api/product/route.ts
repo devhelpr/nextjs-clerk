@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -22,13 +22,15 @@ export async function GET(request: NextRequest) {
       Math.max(1, parseInt(searchParams.get("limit") ?? "10"))
     );
     const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const sortOrder = (searchParams.get("sortOrder") || "desc") as
+      | "asc"
+      | "desc";
     const search = searchParams.get("search") || "";
 
     const skip = (page - 1) * limit;
 
     // Build where clause for search
-    const where = search
+    const where: Prisma.ProductWhereInput = search
       ? {
           OR: [
             { name: { contains: search, mode: "insensitive" } },
