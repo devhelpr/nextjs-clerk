@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { PrismaClient, Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
 // GET - Read with pagination and sorting
 export async function GET(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const session = await auth();
     if (!session?.userId) {
@@ -39,18 +38,18 @@ export async function GET(request: NextRequest) {
         }
       : {};
 
-    // Get total count
-    const total = await prisma.product.count({ where });
-
-    // Get paginated and sorted data
-    const products = await prisma.product.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-    });
+    // Get total count and data in parallel
+    const [total, products] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       data: products,
@@ -68,11 +67,14 @@ export async function GET(request: NextRequest) {
       { error: "Failed to fetch products", details: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 // POST - Create new product
 export async function POST(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const session = await auth();
     if (!session?.userId) {
@@ -107,11 +109,14 @@ export async function POST(request: NextRequest) {
       { error: "Failed to create product", details: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 // PUT - Update product
 export async function PUT(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const session = await auth();
     if (!session?.userId) {
@@ -147,11 +152,14 @@ export async function PUT(request: NextRequest) {
       { error: "Failed to update product", details: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 // DELETE - Delete product
 export async function DELETE(request: NextRequest) {
+  const prisma = new PrismaClient();
   try {
     const session = await auth();
     if (!session?.userId) {
@@ -182,5 +190,7 @@ export async function DELETE(request: NextRequest) {
       { error: "Failed to delete product", details: (error as Error).message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
