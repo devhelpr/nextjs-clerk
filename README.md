@@ -9,6 +9,9 @@ How is this project created?
 - Cursor.com was used to bootstrap the project further with my instructions
 - Supabase postgreSql is used to store the data, database schema was created using chatgpt and manually enhanced
 - While bootstrapping the project with Cursor.com, lots of manual work was done to make the project work as expected. Mainly in the route api's when dealing with the sql statements for communication with the database.
+- I am now migrating the project to use Prisma to make the project more maintainable and easier to work with... using Cursor.
+- splitting up the Table component in a atomic design way to make the project more maintainable and easier to work with... multiple components were created but multiple prompts were neaded to get it to work (especially the editting of rows)
+
 
 ## Getting Started
 
