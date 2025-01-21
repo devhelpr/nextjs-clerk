@@ -12,7 +12,7 @@ interface Product {
   createdAt: string;
 }
 
-export default function ProductTable() {
+export default function ProductView() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState<Partial<Product>>({});
 

@@ -1,10 +1,10 @@
 import { SignedIn } from "@clerk/nextjs";
-import ProductTable from "./table";
+import ProductView from "./product-view";
 
 export default function Home() {
   return (
     <SignedIn>
-      <ProductTable />
+      <ProductView />
     </SignedIn>
   );
 }
