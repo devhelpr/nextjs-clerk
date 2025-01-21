@@ -1,75 +1,72 @@
 import { useState } from "react";
-import { Column } from "../organisms/DataTable";
+import { Column } from "@/types/table";
 import TableCell from "../atoms/TableCell";
 import Button from "../atoms/Button";
 
 interface EditableRowProps<T> {
   item: T;
   columns: Column<T>[];
-  onSave: (item: T) => void;
+  onSave: (item: T) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 }
 
-export function EditableRow<T extends Record<string, any>>({
-  item,
+export function EditableRow<T>({
+  item: initialItem,
   columns,
   onSave,
   onCancel,
-  loading,
+  loading = false,
 }: EditableRowProps<T>) {
-  const [editedItem, setEditedItem] = useState<T>({ ...item });
+  const [item, setItem] = useState<T>(initialItem);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(item);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleChange = (key: keyof T, value: any) => {
-    setEditedItem((prev: T) => ({ ...prev, [key]: value }));
+    setItem((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
     <tr className="bg-blue-50 dark:bg-blue-900/20">
-      {columns.map((column, index) => {
-        if (typeof column.accessor === "function") {
-          return (
-            <TableCell key={index} className={column.className}>
-              {column.accessor(editedItem)}
-            </TableCell>
-          );
-        }
-
-        const value = editedItem[column.accessor];
-        return (
-          <TableCell key={index} className={column.className}>
+      {columns.map((column, index) => (
+        <TableCell key={index}>
+          {typeof column.accessor === "function" ? (
+            column.accessor(item)
+          ) : (
             <input
-              type={typeof value === "number" ? "number" : "text"}
-              value={value ?? ""}
+              type="text"
+              value={String(item[column.accessor] ?? "")}
               onChange={(e) =>
-                handleChange(
-                  column.accessor as keyof T,
-                  typeof value === "number"
-                    ? Number(e.target.value)
-                    : e.target.value
-                )
+                handleChange(column.accessor as keyof T, e.target.value)
               }
               className="w-full px-2 py-1 border rounded dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-              autoFocus={index === 0}
             />
-          </TableCell>
-        );
-      })}
+          )}
+        </TableCell>
+      ))}
       <TableCell>
         <div className="flex gap-2">
           <Button
-            onClick={() => onSave(editedItem)}
+            onClick={handleSave}
             variant="primary"
             size="sm"
-            disabled={loading}
+            disabled={loading || isSaving}
           >
-            Save
+            {isSaving ? "Saving..." : "Save"}
           </Button>
           <Button
             onClick={onCancel}
             variant="secondary"
             size="sm"
-            disabled={loading}
+            disabled={loading || isSaving}
           >
             Cancel
           </Button>
