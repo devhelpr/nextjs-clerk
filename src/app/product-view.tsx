@@ -1,20 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { DataTable, Column } from "@/components/organisms/DataTable";
-import Button from "@/components/atoms/Button";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number | null;
-  description: string | null;
-  createdAt: string;
-}
+import React, { useState } from "react";
+import { Product } from "@/types/product";
+import { ProductForm } from "@/components/molecules/ProductForm";
+import { DataTable } from "@/components/organisms/DataTable";
+import { Column } from "@/types/table";
 
 export default function ProductView() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [newProduct, setNewProduct] = useState<Partial<Product>>({});
 
   const fetchData = async (page: number, limit: number) => {
     const response = await fetch(`/api/product?page=${page}&limit=${limit}`);
@@ -59,23 +52,17 @@ export default function ProductView() {
     }
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newProduct.name) return;
-
+  const handleAdd = async (product: Partial<Product>) => {
     const response = await fetch("/api/product", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newProduct),
+      body: JSON.stringify(product),
     });
 
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error);
     }
-
-    setNewProduct({});
   };
 
   const columns: Column<Product>[] = [
@@ -99,45 +86,7 @@ export default function ProductView() {
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold dark:text-white">Products</h1>
           <div className="flex items-center gap-4">
-            <form onSubmit={handleAdd} className="flex gap-2">
-              <input
-                type="text"
-                value={newProduct.name || ""}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, name: e.target.value })
-                }
-                placeholder="Product name"
-                className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-                required
-              />
-              <input
-                type="number"
-                value={newProduct.price || ""}
-                onChange={(e) =>
-                  setNewProduct({
-                    ...newProduct,
-                    price: e.target.value ? parseFloat(e.target.value) : null,
-                  })
-                }
-                placeholder="Price"
-                className="border rounded px-2 py-1 w-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-              />
-              <input
-                type="text"
-                value={newProduct.description || ""}
-                onChange={(e) =>
-                  setNewProduct({
-                    ...newProduct,
-                    description: e.target.value,
-                  })
-                }
-                placeholder="Description"
-                className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-400"
-              />
-              <Button type="submit" disabled={!newProduct.name}>
-                Add Product
-              </Button>
-            </form>
+            <ProductForm onSubmit={handleAdd} />
           </div>
         </div>
 
