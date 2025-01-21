@@ -39,7 +39,7 @@ export function DataTable<T>({
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const limit = 10;
+  const [limit, setLimit] = useState(10);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -56,7 +56,7 @@ export function DataTable<T>({
 
   useEffect(() => {
     loadData();
-  }, [page, refreshTrigger]);
+  }, [page, limit, refreshTrigger]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -71,9 +71,8 @@ export function DataTable<T>({
           className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
           value={limit}
           onChange={(e) => {
-            const newLimit = parseInt(e.target.value);
+            setLimit(parseInt(e.target.value));
             setPage(1);
-            loadData();
           }}
           disabled={isLoading}
         >
@@ -102,7 +101,7 @@ export function DataTable<T>({
               const isEditing =
                 editingItem && keyExtractor(editingItem) === keyExtractor(item);
 
-              if (isEditing && editingItem) {
+              if (isEditing && editingItem && onSave && onCancelEdit) {
                 return (
                   <EditableRow
                     key={keyExtractor(item)}
