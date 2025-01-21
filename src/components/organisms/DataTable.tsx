@@ -63,6 +63,8 @@ export function DataTable<T>({
   };
 
   const totalPages = Math.ceil(total / limit);
+  const start = total === 0 ? 0 : (page - 1) * limit + 1;
+  const end = Math.min(page * limit, total);
 
   return (
     <div className="w-full">
@@ -97,72 +99,89 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {data.map((item) => {
-              const isEditing =
-                editingItem && keyExtractor(editingItem) === keyExtractor(item);
-
-              if (isEditing && editingItem && onSave && onCancelEdit) {
-                return (
-                  <EditableRow
-                    key={keyExtractor(item)}
-                    item={editingItem}
-                    columns={columns}
-                    onSave={onSave}
-                    onCancel={onCancelEdit}
-                    loading={isLoading}
-                  />
-                );
-              }
-
-              return (
-                <tr
-                  key={keyExtractor(item)}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+            {data.length === 0 && !isLoading ? (
+              <tr>
+                <td
+                  colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}
+                  className="px-6 py-4 text-center text-gray-500 dark:text-gray-400"
                 >
-                  {columns.map((column, index) => (
-                    <TableCell key={index} className={column.className}>
-                      {typeof column.accessor === "function"
-                        ? column.accessor(item)
-                        : String(item[column.accessor] ?? "")}
-                    </TableCell>
-                  ))}
-                  {(onEdit || onDelete) && (
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {onEdit && (
-                          <Button
-                            onClick={() => onEdit(item)}
-                            variant="secondary"
-                            size="sm"
-                            disabled={isLoading || !!editingItem}
-                          >
-                            Edit
-                          </Button>
-                        )}
-                        {onDelete && (
-                          <Button
-                            onClick={() => onDelete(item)}
-                            variant="danger"
-                            size="sm"
-                            disabled={isLoading || !!editingItem}
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  )}
-                </tr>
-              );
-            })}
+                  No data available
+                </td>
+              </tr>
+            ) : (
+              data.map((item) => {
+                const isEditing =
+                  editingItem &&
+                  keyExtractor(editingItem) === keyExtractor(item);
+
+                if (isEditing && editingItem && onSave && onCancelEdit) {
+                  return (
+                    <EditableRow
+                      key={keyExtractor(item)}
+                      item={editingItem}
+                      columns={columns}
+                      onSave={onSave}
+                      onCancel={onCancelEdit}
+                      loading={isLoading}
+                    />
+                  );
+                }
+
+                return (
+                  <tr
+                    key={keyExtractor(item)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    {columns.map((column, index) => (
+                      <TableCell key={index} className={column.className}>
+                        {typeof column.accessor === "function"
+                          ? column.accessor(item)
+                          : String(item[column.accessor] ?? "")}
+                      </TableCell>
+                    ))}
+                    {(onEdit || onDelete) && (
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {onEdit && (
+                            <Button
+                              onClick={() => onEdit(item)}
+                              variant="secondary"
+                              size="sm"
+                              disabled={isLoading || !!editingItem}
+                            >
+                              Edit
+                            </Button>
+                          )}
+                          {onDelete && (
+                            <Button
+                              onClick={() => onDelete(item)}
+                              variant="danger"
+                              size="sm"
+                              disabled={isLoading || !!editingItem}
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="mt-4 flex justify-between items-center">
         <div className="text-sm text-gray-700 dark:text-gray-300">
-          Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of{" "}
-          {total} results
+          {total > 0 ? (
+            <>
+              Showing {start} to {end} of {total} results
+            </>
+          ) : (
+            "No results"
+          )}
         </div>
         {totalPages > 1 && (
           <Pagination

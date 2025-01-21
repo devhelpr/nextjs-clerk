@@ -11,7 +11,8 @@ How is this project created?
 - While bootstrapping the project with Cursor.com, lots of manual work was done to make the project work as expected. Mainly in the route api's when dealing with the sql statements for communication with the database.
 - I am now migrating the project to use Prisma to make the project more maintainable and easier to work with... using Cursor.
 - splitting up the Table component in a atomic design way to make the project more maintainable and easier to work with... multiple components were created but multiple prompts were neaded to get it to work (especially the editting of rows)
-
+- still often errors happened and were only found during build... cursor could fix it by copy & pasting the errors in composer.
+- Agent mode is a big improvement , especially when commands needed to be executed for example when directories needed to be created , files needed to be copied or npm commands needed to be executed.
 
 ## Getting Started
 

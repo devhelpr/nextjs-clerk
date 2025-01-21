@@ -12,9 +12,18 @@ export default function ProductView() {
 
   const fetchData = async (page: number, limit: number) => {
     const response = await fetch(`/api/product?page=${page}&limit=${limit}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch products");
+    }
     const result = await response.json();
-    if (result.error) throw new Error(result.error);
-    return result;
+    console.log("API Response:", result); // Debug log
+    return {
+      data: Array.isArray(result.data) ? result.data : [],
+      total:
+        typeof result.total === "number"
+          ? result.total
+          : result.data?.length || 0,
+    };
   };
 
   const refreshTable = useCallback(() => {
