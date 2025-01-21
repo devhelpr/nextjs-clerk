@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Product } from "@/types/product";
 import { ProductForm } from "@/components/molecules/ProductForm";
 import { DataTable } from "@/components/organisms/DataTable";
@@ -8,6 +8,7 @@ import { Column } from "@/types/table";
 
 export default function ProductView() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchData = async (page: number, limit: number) => {
     const response = await fetch(`/api/product?page=${page}&limit=${limit}`);
@@ -15,6 +16,10 @@ export default function ProductView() {
     if (result.error) throw new Error(result.error);
     return result;
   };
+
+  const refreshTable = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
@@ -33,6 +38,7 @@ export default function ProductView() {
     }
 
     setEditingProduct(null);
+    refreshTable();
   };
 
   const handleCancel = () => {
@@ -50,6 +56,7 @@ export default function ProductView() {
       const error = await response.json();
       throw new Error(error.error);
     }
+    refreshTable();
   };
 
   const handleAdd = async (product: Partial<Product>) => {
@@ -63,6 +70,7 @@ export default function ProductView() {
       const error = await response.json();
       throw new Error(error.error);
     }
+    refreshTable();
   };
 
   const columns: Column<Product>[] = [
@@ -76,7 +84,8 @@ export default function ProductView() {
     { header: "Description", accessor: "description" },
     {
       header: "Created At",
-      accessor: (item) => new Date(item.createdAt).toLocaleDateString(),
+      accessor: (item: Product) =>
+        new Date(item.createdAt).toLocaleDateString(),
     },
   ];
 
@@ -95,10 +104,11 @@ export default function ProductView() {
           fetchData={fetchData}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: Product) => item.id}
           editingItem={editingProduct}
           onSave={handleSave}
           onCancelEdit={handleCancel}
+          refreshTrigger={refreshTrigger}
         />
       </div>
     </main>

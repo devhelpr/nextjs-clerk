@@ -1,37 +1,27 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import LoadingSpinner from "../atoms/LoadingSpinner";
 import TableCell from "../atoms/TableCell";
 import Button from "../atoms/Button";
 import Pagination from "../molecules/Pagination";
 import EditableRow from "../molecules/EditableRow";
+import { Column } from "@/types/table";
 
-export interface Column<T> {
-  header: string;
-  accessor: keyof T | ((item: T) => React.ReactNode);
-  className?: string;
-}
-
-interface PaginationData {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasMore: boolean;
-}
-
-interface DataTableProps<T> {
+export interface DataTableProps<T> {
   columns: Column<T>[];
   fetchData: (
     page: number,
     limit: number
-  ) => Promise<{ data: T[]; pagination: PaginationData }>;
+  ) => Promise<{
+    data: T[];
+    total: number;
+  }>;
   onEdit?: (item: T) => void;
-  onDelete?: (item: T) => void;
+  onDelete?: (item: T) => Promise<void>;
   onSave?: (item: T) => Promise<void>;
   onCancelEdit?: () => void;
-  editingItem?: T | null;
   keyExtractor: (item: T) => string | number;
-  defaultLimit?: number;
+  editingItem?: T | null;
+  refreshTrigger?: number;
 }
 
 export function DataTable<T>({
@@ -41,83 +31,51 @@ export function DataTable<T>({
   onDelete,
   onSave,
   onCancelEdit,
-  editingItem,
   keyExtractor,
-  defaultLimit = 10,
+  editingItem,
+  refreshTrigger = 0,
 }: DataTableProps<T>) {
   const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<PaginationData>({
-    total: 0,
-    page: 1,
-    limit: defaultLimit,
-    totalPages: 0,
-    hasMore: false,
-  });
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const limit = 10;
 
-  const loadData = async (page: number, limit: number) => {
+  const loadData = async () => {
+    setIsLoading(true);
     try {
-      setLoading(true);
       const result = await fetchData(page, limit);
       setData(result.data);
-      setPagination(result.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch data");
+      setTotal(result.total);
+    } catch (error) {
+      console.error("Error loading data:", error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData(pagination.page, pagination.limit);
-  }, [pagination.page, pagination.limit]);
+    loadData();
+  }, [page, refreshTrigger]);
 
   const handlePageChange = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
+    setPage(newPage);
   };
 
-  const handleLimitChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLimit = parseInt(event.target.value);
-    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
-  };
-
-  const handleSave = async (item: T) => {
-    try {
-      setLoading(true);
-      await onSave?.(item);
-      await loadData(pagination.page, pagination.limit);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (item: T) => {
-    try {
-      setLoading(true);
-      await onDelete?.(item);
-      await loadData(pagination.page, pagination.limit);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    onCancelEdit?.();
-  };
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-end">
         <select
           className="border rounded px-2 py-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-          value={pagination.limit}
-          onChange={handleLimitChange}
-          disabled={loading}
+          value={limit}
+          onChange={(e) => {
+            const newLimit = parseInt(e.target.value);
+            setPage(1);
+            loadData();
+          }}
+          disabled={isLoading}
         >
           <option value="5">5 per page</option>
           <option value="10">10 per page</option>
@@ -127,7 +85,7 @@ export function DataTable<T>({
       </div>
 
       <div className="relative overflow-x-auto">
-        {loading && <LoadingSpinner />}
+        {isLoading && <LoadingSpinner />}
         <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
           <thead>
             <tr>
@@ -150,9 +108,9 @@ export function DataTable<T>({
                     key={keyExtractor(item)}
                     item={editingItem}
                     columns={columns}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                    loading={loading}
+                    onSave={onSave}
+                    onCancel={onCancelEdit}
+                    loading={isLoading}
                   />
                 );
               }
@@ -177,17 +135,17 @@ export function DataTable<T>({
                             onClick={() => onEdit(item)}
                             variant="secondary"
                             size="sm"
-                            disabled={loading || !!editingItem}
+                            disabled={isLoading || !!editingItem}
                           >
                             Edit
                           </Button>
                         )}
                         {onDelete && (
                           <Button
-                            onClick={() => handleDelete(item)}
+                            onClick={() => onDelete(item)}
                             variant="danger"
                             size="sm"
-                            disabled={loading || !!editingItem}
+                            disabled={isLoading || !!editingItem}
                           >
                             Delete
                           </Button>
@@ -204,23 +162,18 @@ export function DataTable<T>({
 
       <div className="mt-4 flex justify-between items-center">
         <div className="text-sm text-gray-700 dark:text-gray-300">
-          Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-          {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} results
+          Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of{" "}
+          {total} results
         </div>
-        <Pagination
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-          loading={loading}
-        />
+        {totalPages > 1 && (
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            loading={isLoading}
+          />
+        )}
       </div>
-
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded">
-          {error}
-        </div>
-      )}
     </div>
   );
 }
