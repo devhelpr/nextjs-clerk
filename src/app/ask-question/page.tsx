@@ -70,7 +70,7 @@ export default function AskQuestionPage() {
           initial={{ opacity: 0, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center py-4"
+          className="text-center py-4 flex-shrink-0"
         >
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
             AI Document Assistant
@@ -93,8 +93,8 @@ export default function AskQuestionPage() {
           </div>
         </motion.div>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="space-y-6 min-h-[100px] pb-40">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="space-y-6 pb-[15rem]">
             <AnimatePresence>
               {messages.map((message, index) => (
                 <motion.div

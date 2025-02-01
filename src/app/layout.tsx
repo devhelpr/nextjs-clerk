@@ -161,8 +161,8 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main className="pt-14 h-[calc(100vh-3.5rem)] overflow-hidden">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <main className="pt-14 h-[calc(100vh-3.5rem)]">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 {children}
               </div>
             </main>
