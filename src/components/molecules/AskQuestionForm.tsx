@@ -6,22 +6,21 @@ import Button from "../atoms/Button";
 
 interface AskQuestionFormProps {
   onSubmit: (query: string) => Promise<void>;
+  isLoading: boolean;
 }
 
-export function AskQuestionForm({ onSubmit }: AskQuestionFormProps) {
+export function AskQuestionForm({ onSubmit, isLoading }: AskQuestionFormProps) {
   const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    setIsLoading(true);
     try {
       await onSubmit(query);
       setQuery("");
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error submitting query:", error);
     }
   };
 
