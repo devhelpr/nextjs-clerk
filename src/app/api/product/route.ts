@@ -51,6 +51,8 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
+    console.log("API Response:", { data: products, total }); // Debug log
+
     return NextResponse.json({
       data: products,
       pagination: {

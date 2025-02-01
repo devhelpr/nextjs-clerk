@@ -1,24 +1,36 @@
-datasource db {
-  url      = env("POSTGRES_PRISMA_URL")
-  provider = "postgresql"
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  extensions = [pgvector(map: "vector")]
 }
 
 model Product {
-  id        	Int      @id @default(autoincrement())
-  createdAt 	DateTime @default(now())
-  name      	String?
-  price     	Float?
-  description 	String?
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  name        String
+  price       Float?
+  description String?
 }
 
 model user_profiles {
-  user_id String @unique
-  full_name String?
-  location String?
+  user_id      String   @unique
+  full_name    String?
+  location     String?
   phone_number String?
-  created_at DateTime @default(now())
+  created_at   DateTime @default(now())
+}
+
+model Document {
+  id        String  @id @default(uuid())
+  content   String
+  embedding Float[] 
+  createdAt DateTime @default(now())
 }

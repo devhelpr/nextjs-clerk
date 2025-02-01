@@ -38,3 +38,8 @@ run the following command to generate the prisma client
 ```bash
 prisma generate
 ```
+
+
+create a new migration without running:
+
+npx prisma migrate dev --create-only
