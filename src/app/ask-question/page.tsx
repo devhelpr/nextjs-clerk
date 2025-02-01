@@ -94,7 +94,7 @@ export default function AskQuestionPage() {
         </motion.div>
 
         <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="space-y-6 pb-[15rem]">
+          <div className="space-y-6">
             <AnimatePresence>
               {messages.map((message, index) => (
                 <motion.div
@@ -121,7 +121,7 @@ export default function AskQuestionPage() {
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-900 pt-6 z-20">
+        <div className="left-0 right-0 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-900 pt-6 z-20">
           <div className="max-w-4xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
