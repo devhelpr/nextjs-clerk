@@ -145,7 +145,7 @@ export default function RootLayout({
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
                 <div className="flex justify-between items-center w-full">
                   <h1 className="text-xl font-semibold">
-                    <Link href="/">My App</Link>
+                    <Link href="/">Devhelpr test app</Link>
                   </h1>
                   <SignedOut>
                     <SignInButton>
@@ -170,7 +170,7 @@ export default function RootLayout({
             <footer className="border-t border-gray-200 dark:border-gray-800">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <p className="text-center text-gray-500 dark:text-gray-400">
-                  © {new Date().getFullYear()} My App. All rights reserved.
+                  © {new Date().getFullYear()} Devhelpr. All rights reserved.
                 </p>
               </div>
             </footer>
