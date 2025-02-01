@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FormInput } from "../atoms/FormInput";
+import { FormTextArea } from "../atoms/FormTextArea";
 import Button from "../atoms/Button";
 
 interface AskQuestionFormProps {
@@ -26,11 +26,11 @@ export function AskQuestionForm({ onSubmit }: AskQuestionFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
-      <FormInput
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <FormTextArea
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Ask something..."
+        placeholder="Stel een vraag..."
         required
         disabled={isLoading}
         className="w-full"
@@ -39,8 +39,9 @@ export function AskQuestionForm({ onSubmit }: AskQuestionFormProps) {
         type="submit"
         disabled={!query.trim() || isLoading}
         variant="primary"
+        className="self-end"
       >
-        {isLoading ? "Processing..." : "Ask"}
+        {isLoading ? "Processing..." : "Verzend"}
       </Button>
     </form>
   );
