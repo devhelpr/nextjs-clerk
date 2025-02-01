@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         {
           role: "system",
           content:
-            "Je bent een behulpzame AI assistent en je geeft alleen antwoorden gebaseerd op de meegegeven context en als je iets niet weet of het komt niet voor in de context, dan zeg je dat.",
+            "Je bent een behulpzame AI assistent en je geeft alleen antwoorden gebaseerd op de meegegeven context en als je iets niet weet of het komt niet voor in de context, dan zeg je dat. Format je antwoorden in markdown met headers, bullet points, en code blocks waar relevant.",
         },
         {
           role: "user",

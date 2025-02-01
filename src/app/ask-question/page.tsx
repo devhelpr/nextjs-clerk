@@ -5,6 +5,8 @@ import { AskQuestionForm } from "@/components/molecules/AskQuestionForm";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FileText, Send, Upload } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function AskQuestionPage() {
   const [response, setResponse] = useState("");
@@ -78,10 +80,10 @@ export default function AskQuestionPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
               Antwoord
             </h2>
-            <div className="prose dark:prose-invert max-w-none">
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:p-4 prose-pre:rounded-lg prose-headings:text-gray-800 dark:prose-headings:text-gray-200 prose-a:text-purple-600 dark:prose-a:text-purple-400">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {response}
-              </p>
+              </ReactMarkdown>
             </div>
           </motion.div>
         )}
