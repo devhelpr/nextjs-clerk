@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { query } = body;
+    const { query, history } = body;
 
     if (!query) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
@@ -47,7 +47,19 @@ export async function POST(request: NextRequest) {
       .map((doc) => doc.content)
       .join("\n");
 
-    // Generate response with retrieved context
+    // Format conversation history
+    const conversationHistory = history
+      ? history
+          .map(
+            (msg: { role: string; content: string }) =>
+              `${msg.role === "user" ? "Gebruiker" : "Assistent"}: ${
+                msg.content
+              }`
+          )
+          .join("\n\n")
+      : "";
+
+    // Generate response with retrieved context and history
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
@@ -58,7 +70,18 @@ export async function POST(request: NextRequest) {
         },
         {
           role: "user",
-          content: `Dit is de context:\n${retrievedText}\n\nDit is de vraag van de gebruiker: ${query}`,
+          content: `
+Dit is de context:
+${retrievedText}
+
+${
+  conversationHistory
+    ? `Dit is het eerdere gesprek:
+${conversationHistory}
+
+`
+    : ""
+}Dit is de nieuwe vraag van de gebruiker: ${query}`,
         },
       ],
     });

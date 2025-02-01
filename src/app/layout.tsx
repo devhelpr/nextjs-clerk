@@ -141,9 +141,9 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-black dark:text-white`}
         >
           <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
-            <header className="border-b border-gray-200 dark:border-gray-800">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div className="flex justify-between items-center">
+            <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-50 h-14">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+                <div className="flex justify-between items-center w-full">
                   <h1 className="text-xl font-semibold">
                     <Link href="/">My App</Link>
                   </h1>
@@ -161,8 +161,8 @@ export default function RootLayout({
               </div>
             </header>
 
-            <main className="flex-1">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="pt-14 h-[calc(100vh-3.5rem)] overflow-hidden">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {children}
               </div>
             </main>
