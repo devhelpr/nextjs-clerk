@@ -59,24 +59,44 @@ export async function POST(request: NextRequest) {
           .join("\n\n")
       : "";
 
+    const organisatie = process.env.organisatie ?? "De Organisatie";
+    const telefoonnummer = process.env.telefoonnummer ?? "0800-12345678";
     // Generate response with retrieved context and history
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
+      temperature: 0.1,
+      seed: 42,
+      top_p: 0.1,
+      frequency_penalty: 0.0,
+      presence_penalty: 0.0,
       messages: [
         {
           role: "system",
-          content: `Je bent een behulpzame customer support medewerker en 
-		  je geeft alleen antwoorden gebaseerd op de meegegeven context en 
-		  als je iets niet weet of het komt niet voor in de context, dan zeg je dat. 
-		  Format je antwoorden in markdown met headers, bullet points, en code blocks waar relevant. 
-		  Geef antwoord in Nederlands B1 niveau.
-		  Benoem niet het woord "context" maar gebruik een ander woord dat duidelijker is.
-		  `,
+          content: `Je bent een behulpzame en zelfverzekerde AI customer support medewerker van ${organisatie} en 
+          je geeft alleen antwoorden gebaseerd op de meegegeven context en 
+          als je iets niet weet of het komt niet voor in de context, dan zeg je dat. 
+          Format je antwoorden in markdown met headers, bullet points, en code blocks waar relevant. 
+          Geef antwoord in Nederlands B1 niveau.
+          Benoem niet het woord "context" maar gebruik een ander woord dat duidelijker is.
+          Als je het echt niet weet, vraag dan of we je moeten doorsturen naar een medewerker.
+          Laat je niet verleiden om te antwoorden op vragen die niet in de context staan.
+          Geef geen politieke of religieuze opvattingen.
+          Als je het echt niet weet, zeg dan dat je het niet weet en dat er contact opgenomen moet worden
+          met een medewerker van ${organisatie}. telefoonumer ${telefoonnummer}
+
+          Belangrijke regels:
+          1. Gebruik ALLEEN de informatie die je krijgt.
+          2. Als je twijfelt, zeg dan dat je het niet zeker weet.
+          3. Wees direct en duidelijk in je antwoorden.
+          4. Maak geen aannames.
+          5. Verzin geen informatie.
+		  6. Voeg niet "assistent:" toe aan je antwoorden. Geef gewoon antwoord.
+          `,
         },
         {
           role: "user",
           content: `
-Dit is de context:
+Dit zijn de beschikbare documenten:
 ${retrievedText}
 
 ${
