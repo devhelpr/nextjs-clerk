@@ -58,6 +58,7 @@ async function getProductInfo(
   return products;
 }
 
+const openAIModel = "gpt-4o";
 export async function POST(request: NextRequest) {
   const prisma = new PrismaClient();
   try {
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
     };
     // Generate response with retrieved context and history
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: openAIModel,
       temperature: 0.1,
       seed: 42,
       top_p: 0.1,
@@ -196,8 +197,12 @@ ${conversationHistory}
 
         // Send a follow-up message to get the final response
         const followUpCompletion = await openai.chat.completions.create({
-          model: "gpt-4",
+          model: openAIModel,
           temperature: 0.1,
+          seed: 42,
+          top_p: 0.1,
+          frequency_penalty: 0.0,
+          presence_penalty: 0.0,
           messages: [
             { ...sytemMessage },
             {
