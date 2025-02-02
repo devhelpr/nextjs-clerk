@@ -7,16 +7,35 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Send, Upload } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useUser } from "@clerk/nextjs";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+const getTimeBasedGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Goedemorgen";
+  if (hour < 18) return "Goedemiddag";
+  return "Goedenavond";
+};
+
+const createWelcomeMessage = (name?: string) => {
+  const greeting = getTimeBasedGreeting();
+  const nameGreeting = name ? `, ${name}` : "";
+
+  return `## ${greeting}${nameGreeting}! 👋
+
+Stel gerust je vraag in het tekstveld hieronder, en ik zal mijn best doen om je te helpen met de beschikbare informatie.`;
+};
+
 export default function AskQuestionPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ name?: string | null }>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user, isLoaded: isUserLoaded } = useUser();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,6 +44,37 @@ export default function AskQuestionPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch("/api/user-profile");
+        if (res.ok) {
+          const data = await res.json();
+
+          setUserProfile({ name: data.full_name });
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    if (isUserLoaded) {
+      fetchUserProfile();
+    }
+  }, [isUserLoaded]);
+
+  useEffect(() => {
+    if (isUserLoaded && messages.length === 0 && userProfile) {
+      const welcomeMessage: Message = {
+        role: "assistant",
+        content: createWelcomeMessage(
+          userProfile?.name || user?.firstName || undefined
+        ),
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [isUserLoaded, user?.firstName, messages.length, userProfile?.name]);
 
   const handleSubmit = async (query: string) => {
     setIsLoading(true);
