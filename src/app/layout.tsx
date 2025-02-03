@@ -11,7 +11,6 @@ import {
 } from "@clerk/nextjs";
 import Link from "next/link";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ThemeToggle } from "@/components/atoms/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +30,6 @@ export const metadata: Metadata = {
 function NavMenu() {
   return (
     <div className="relative flex items-center gap-4">
-      <ThemeToggle />
       {/* Mobile menu button using checkbox hack */}
       <label htmlFor="menu-toggle" className="md:hidden cursor-pointer">
         <div className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
@@ -139,9 +137,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-black dark:text-white`}
+          suppressHydrationWarning
         >
           <ThemeProvider>
             <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
