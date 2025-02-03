@@ -27,6 +27,8 @@ const createWelcomeMessage = (name?: string) => {
 
   return `## ${greeting}${nameGreeting}! 👋
 
+Welkom bij ${process.env.NEXT_PUBLIC_ORGANISATIE ?? "De Organisatie"}!
+
 Stel gerust je vraag in het tekstveld hieronder, en ik zal mijn best doen om je te helpen met de beschikbare informatie.`;
 };
 
