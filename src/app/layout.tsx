@@ -10,6 +10,8 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Link from "next/link";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeToggle } from "@/components/atoms/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +30,8 @@ export const metadata: Metadata = {
 
 function NavMenu() {
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-4">
+      <ThemeToggle />
       {/* Mobile menu button using checkbox hack */}
       <label htmlFor="menu-toggle" className="md:hidden cursor-pointer">
         <div className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
@@ -136,45 +139,47 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="light">
+      <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-black dark:text-white`}
         >
-          <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
-            <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-50 h-14">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-                <div className="flex justify-between items-center w-full">
-                  <h1 className="text-xl font-semibold">
-                    <Link href="/">Devhelpr test app</Link>
-                  </h1>
-                  <SignedOut>
-                    <SignInButton>
-                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-                        Sign in
-                      </button>
-                    </SignInButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <NavMenu />
-                  </SignedIn>
+          <ThemeProvider>
+            <div className="grid grid-rows-[auto_1fr_auto] min-h-screen">
+              <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-50 h-14">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+                  <div className="flex justify-between items-center w-full">
+                    <h1 className="text-xl font-semibold">
+                      <Link href="/">Devhelpr test app</Link>
+                    </h1>
+                    <SignedOut>
+                      <SignInButton>
+                        <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                          Sign in
+                        </button>
+                      </SignInButton>
+                    </SignedOut>
+                    <SignedIn>
+                      <NavMenu />
+                    </SignedIn>
+                  </div>
                 </div>
-              </div>
-            </header>
+              </header>
 
-            <main className="pt-14 h-[calc(100vh-3.5rem)]">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-                {children}
-              </div>
-            </main>
+              <main className="pt-14 h-[calc(100vh-3.5rem)]">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+                  {children}
+                </div>
+              </main>
 
-            <footer className="border-t border-gray-200 dark:border-gray-800">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <p className="text-center text-gray-500 dark:text-gray-400">
-                  © {new Date().getFullYear()} Devhelpr. All rights reserved.
-                </p>
-              </div>
-            </footer>
-          </div>
+              <footer className="border-t border-gray-200 dark:border-gray-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <p className="text-center text-gray-500 dark:text-gray-400">
+                    © {new Date().getFullYear()} Devhelpr. All rights reserved.
+                  </p>
+                </div>
+              </footer>
+            </div>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
