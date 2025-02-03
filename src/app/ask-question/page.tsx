@@ -171,7 +171,7 @@ export default function AskQuestionPage() {
           </div>
         </div>
 
-        <div className="left-0 right-0 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-900 pt-6 z-20">
+        <div className="left-0 right-0 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent dark:from-gray-900 dark:via-gray-900 dark:to-transparent pt-6 z-20">
           <div className="max-w-4xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
