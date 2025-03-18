@@ -9,41 +9,31 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const toolDecisionName = "get_decision_info";
+
 // Function definitions for OpenAI
 const functions: ChatCompletionCreateParams.Function[] = [
   {
-    name: "get_product_info",
-    description: "zoeken van prijs en informatie over producten/artikelen",
+    name: toolDecisionName,
+    description:
+      "zoeken van informatie over een beschikking , beslissing , uitspraak of bezwaar",
     parameters: {
       type: "object",
       properties: {
-        productName: {
+        decisionNumber: {
           type: "string",
-          description: "the naam van het product wat je zoekt",
-        },
-        searchType: {
-          type: "string",
-          enum: ["exact", "partial"],
           description:
-            "zoeken naar exacte of gedeeltelijke naam van het product",
+            "het beschikkingsnummer, beslissingsnummer, uitspraaknummer of bezwaarnummer",
         },
       },
-      required: ["productName", "searchType"],
+      required: ["decisionNumber"],
     },
   },
 ] as const;
 
 // Function to handle product information retrieval
-async function getProductInfo(
-  productName: string,
-  searchType: "exact" | "partial",
-  prisma: PrismaClient
-) {
-  const where: Prisma.ProductWhereInput =
-    searchType === "exact"
-      ? { name: productName }
-      : { name: { contains: productName, mode: Prisma.QueryMode.insensitive } };
-
+async function getDecisionInfo(productName: string, prisma: PrismaClient) {
+  const where: Prisma.ProductWhereInput = { name: productName };
   const products = await prisma.product.findMany({
     where,
     select: {
@@ -186,14 +176,10 @@ ${conversationHistory}
     if (completion.choices[0].message.function_call) {
       const functionCall = completion.choices[0].message.function_call;
 
-      if (functionCall.name === "get_product_info") {
+      if (functionCall.name === toolDecisionName) {
         const args = JSON.parse(functionCall.arguments);
-        console.log("args", args.productName, args.searchType);
-        const products = await getProductInfo(
-          args.productName,
-          args.searchType,
-          prisma
-        );
+        console.log("args", args.decisionNumber);
+        const products = await getDecisionInfo(args.decisionNumber, prisma);
 
         // Send a follow-up message to get the final response
         const followUpCompletion = await openai.chat.completions.create({
@@ -207,7 +193,7 @@ ${conversationHistory}
             { ...sytemMessage },
             {
               role: "function",
-              name: "get_product_info",
+              name: toolDecisionName,
               content: JSON.stringify(products),
             },
           ],
