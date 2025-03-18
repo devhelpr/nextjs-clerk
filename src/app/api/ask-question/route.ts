@@ -45,7 +45,11 @@ async function getDecisionInfo(productName: string, prisma: PrismaClient) {
 
   console.log("products", products);
 
-  return products;
+  return {
+    beschikkingNummer: products[0].name,
+    beslissingBedrag: products[0].price,
+    beslissingOmschrijving: products[0].description,
+  };
 }
 
 const openAIModel = "gpt-4o";
